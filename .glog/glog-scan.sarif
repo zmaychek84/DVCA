@@ -12,24 +12,24 @@
           "informationUri": "https://www.glog.ai",
           "rules": [
             {
-              "id": "c6a40b22-1bb0-30da-a328-5990104e9e44",
-              "name": "Avoid Using Non-Cryptographic or Weak Random Number Generators",
+              "id": "1dd596fd-f236-3581-ba3b-9c0106c06afb",
+              "name": "\"Detected Use of Prohibited C Function (strcpy)\"",
               "helpUri": "https://www.glog.ai/",
               "help": {
                 "text": "",
-                "markdown": "## Description\n\nIn C++ programming, the vulnerability \"Avoid Using Non-Cryptographic or Weak Random Number Generators\" refers to the use of weak or non-cryptographic random number generators like `rand()`. These generators are not suitable for generating random numbers in a security context, as they can produce predictable outcomes and can be easily exploited by attackers.\n\nThe specific vulnerability sink in this case is `rand() % 2`, which generates a pseudo-random number and then calculates the remainder of the division by 2. This operation can only result in two possible outcomes (0 or 1), making it highly predictable and unsuitable for security-sensitive operations.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, use a strong, cryptographic random number generator instead of `rand()`. In C++, you can use the `random_device` class from the `<random>` library, which is designed to produce non-deterministic random numbers.\n\n## Source Code Fix Recommendation\n\nReplace the `rand() % 2` code with the following:\n\n```cpp\n#include <random>\n\nstd::random_device rd;\nstd::mt19937 gen(rd());\nstd::uniform_int_distribution<> dis(0, 1);\n\nint random_number = dis(gen);\n```\n\nThis code uses `random_device` to seed the Mersenne Twister engine (`mt19937`), which is a high-quality pseudo-random number generator. The `uniform_int_distribution` class is then used to generate a random number in the range [0, 1].\n\n## Library Dependencies\n\nThe above code requires the `<random>` library.\n\n## References\n\n- [CWE-338: Use of Cryptographically Weak PRNG](https://cwe.mitre.org/data/definitions/338.html)"
+                "markdown": "## Description\n\nThe `strcpy` function in C++ is a standard library function that copies a string. However, it is considered unsafe because it does not check the size of the destination buffer, which can lead to buffer overflow vulnerabilities if the source string is larger than the destination buffer. This can lead to crashes, data corruption, and potentially code execution, making it a serious security risk.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, use safer string copy functions that include a length parameter. This allows the function to ensure that it does not write past the end of the buffer. Functions like `strncpy`, `strlcpy`, or `memcpy` can be used instead, but they must be used correctly to ensure safety.\n\n## Source Code Fix Recommendation\n\nHere is a fixed version of the code using `strncpy`:\n\n```cpp\nchar portfolio_data[100]; // Ensure the buffer is large enough\nstrncpy(portfolio_data, \"Historical portfolio data.\", sizeof(portfolio_data));\nportfolio_data[sizeof(portfolio_data) - 1] = '\\0'; // Ensure null termination\n```\n\n## Library Dependencies\n\nThe code example requires the `<cstring>` library.\n\n## References\n\n- [OWASP C++ Secure Coding Practices](https://cheatsheetseries.owasp.org/cheatsheets/C-Based_Toolchain_Hardening_Cheat_Sheet.html)\n- [CWE-119: Improper Restriction of Operations within the Bounds of a Memory Buffer](https://cwe.mitre.org/data/definitions/119.html)\n\nPlease note that the links provided are accessible to anonymous users at the time of writing this report."
               },
               "properties": {
                 "cwe": [
                   {
-                    "id": "CWE-338",
-                    "url": "https://cwe.mitre.org/data/definitions/338.html"
+                    "id": "CWE-119",
+                    "url": "https://cwe.mitre.org/data/definitions/119.html"
                   }
                 ],
                 "severity": "HIGH",
                 "kind": "FAIL",
                 "tags": [
-                  "CWE-338"
+                  "CWE-119"
                 ]
               }
             },
@@ -56,68 +56,46 @@
               }
             },
             {
-              "id": "27fbf7d2-3772-311f-ae81-7273100fcee9",
-              "name": "\"Detected Use of Prohibited C Function (gets)\"",
+              "id": "ec471128-c1cb-300c-b212-3f4bb4fbec26",
+              "name": "\"Prohibited C Function (gets) Vulnerability Detected\"",
               "helpUri": "https://www.glog.ai/",
               "help": {
                 "text": "",
-                "markdown": "## Description\n\nThe `gets()` function in C++ is a standard library function that reads a line from `stdin` into the buffer pointed to by `s` until either a terminating newline or EOF (End of File). The vulnerability arises because `gets()` does not check for array bounds, which can lead to buffer overflow if the input has more characters than the buffer can hold. This can lead to arbitrary code execution or denial of service.\n\n## Mitigation Advice\n\nAvoid using `gets()` function. Instead, use safer alternatives like `fgets()`, `gets_s()`, or `cin.getline()` which take the size of the buffer as an argument and thus prevent buffer overflow.\n\n## Source Code Fix Recommendation\n\nReplace `gets(buffer)` with `fgets(buffer, sizeof(buffer), stdin)`. Here is the corrected code:\n\n```cpp\nchar buffer[256];\nfgets(buffer, sizeof(buffer), stdin);\n```\n\n## Library Dependencies\n\nThe code example requires the standard C++ library `<stdio.h>` or `<cstdio>` for `fgets()` function.\n\n## References\n\n- [OWASP Buffer Overflow](https://owasp.org/www-community/vulnerabilities/Buffer_Overflow)\n- [CWE-242: Use of Inherently Dangerous Function](https://cwe.mitre.org/data/definitions/242.html)"
+                "markdown": "## Description\n\nThe `gets()` function in C++ is a standard library function that reads a line from stdin into the buffer pointed to by `str`. It stops when either the newline character is read or when the end-of-file is reached, whichever comes first. The newline character is discarded and replaced by a null-character.\n\nThe `gets()` function is dangerous because it does not check the array bounds, which can lead to buffer overflow. This can cause a program to crash or to execute arbitrary code. This is why the use of `gets()` is prohibited in C++.\n\n## Mitigation Advice\n\nAvoid using `gets()` function. Instead, use safer alternatives like `fgets()`, `gets_s()`, or `cin.getline()` in C++. These functions allow you to specify the maximum number of characters to be read, including the null character, which prevents buffer overflow.\n\n## Source Code Fix Recommendation\n\nReplace `gets(note)` with `fgets(note, sizeof(note), stdin)` or `cin.getline(note, sizeof(note))`.\n\n## Library Dependencies\n\nThe `gets()` function is part of the C Standard Library, so you need to include the `stdio.h` header file. If you use `cin.getline()`, you need to include the `iostream` header file.\n\n## References\n\n- [OWASP Buffer Overflow](https://owasp.org/www-community/vulnerabilities/Buffer_Overflow)\n- [CWE-120: Buffer Copy without Checking Size of Input ('Classic Buffer Overflow')](https://cwe.mitre.org/data/definitions/120.html)"
               },
               "properties": {
                 "cwe": [
                   {
-                    "id": "CWE-242",
-                    "url": "https://cwe.mitre.org/data/definitions/242.html"
+                    "id": "CWE-120",
+                    "url": "https://cwe.mitre.org/data/definitions/120.html"
                   }
                 ],
                 "severity": "HIGH",
                 "kind": "FAIL",
                 "tags": [
-                  "CWE-242"
+                  "CWE-120"
                 ]
               }
             },
             {
-              "id": "1dd596fd-f236-3581-ba3b-9c0106c06afb",
-              "name": "\"Detected Use of Prohibited C Function (strcpy)\"",
+              "id": "c6a40b22-1bb0-30da-a328-5990104e9e44",
+              "name": "Avoid Using Non-Cryptographic or Weak Random Number Generators",
               "helpUri": "https://www.glog.ai/",
               "help": {
                 "text": "",
-                "markdown": "## Description\n\nThe `strcpy` function in C++ is a standard library function that copies a string. However, it is considered unsafe because it does not check the size of the destination buffer, which can lead to buffer overflow vulnerabilities if the source string is larger than the destination buffer. This can lead to crashes, data corruption, and potentially code execution, making it a serious security risk.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, use safer string copy functions that include a length parameter. This allows the function to ensure that it does not write past the end of the buffer. Functions like `strncpy`, `strlcpy`, or `memcpy` can be used instead, but they must be used correctly to ensure safety.\n\n## Source Code Fix Recommendation\n\nHere is a fixed version of the code using `strncpy`:\n\n```cpp\nchar portfolio_data[100]; // Ensure the buffer is large enough\nstrncpy(portfolio_data, \"Historical portfolio data.\", sizeof(portfolio_data));\nportfolio_data[sizeof(portfolio_data) - 1] = '\\0'; // Ensure null termination\n```\n\n## Library Dependencies\n\nThe code example requires the `<cstring>` library.\n\n## References\n\n- [OWASP C++ Secure Coding Practices](https://cheatsheetseries.owasp.org/cheatsheets/C-Based_Toolchain_Hardening_Cheat_Sheet.html)\n- [CWE-119: Improper Restriction of Operations within the Bounds of a Memory Buffer](https://cwe.mitre.org/data/definitions/119.html)\n\nPlease note that the links provided are accessible to anonymous users at the time of writing this report."
+                "markdown": "## Description\n\nIn C++ programming, the vulnerability \"Avoid Using Non-Cryptographic or Weak Random Number Generators\" refers to the use of weak or non-cryptographic random number generators like `rand()`. These generators are not suitable for generating random numbers in a security context, as they can produce predictable outcomes and can be easily exploited by attackers.\n\nThe specific vulnerability sink in this case is `rand() % 2`, which generates a pseudo-random number and then calculates the remainder of the division by 2. This operation can only result in two possible outcomes (0 or 1), making it highly predictable and unsuitable for security-sensitive operations.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, use a strong, cryptographic random number generator instead of `rand()`. In C++, you can use the `random_device` class from the `<random>` library, which is designed to produce non-deterministic random numbers.\n\n## Source Code Fix Recommendation\n\nReplace the `rand() % 2` code with the following:\n\n```cpp\n#include <random>\n\nstd::random_device rd;\nstd::mt19937 gen(rd());\nstd::uniform_int_distribution<> dis(0, 1);\n\nint random_number = dis(gen);\n```\n\nThis code uses `random_device` to seed the Mersenne Twister engine (`mt19937`), which is a high-quality pseudo-random number generator. The `uniform_int_distribution` class is then used to generate a random number in the range [0, 1].\n\n## Library Dependencies\n\nThe above code requires the `<random>` library.\n\n## References\n\n- [CWE-338: Use of Cryptographically Weak PRNG](https://cwe.mitre.org/data/definitions/338.html)"
               },
               "properties": {
                 "cwe": [
                   {
-                    "id": "CWE-119",
-                    "url": "https://cwe.mitre.org/data/definitions/119.html"
+                    "id": "CWE-338",
+                    "url": "https://cwe.mitre.org/data/definitions/338.html"
                   }
                 ],
                 "severity": "HIGH",
                 "kind": "FAIL",
                 "tags": [
-                  "CWE-119"
-                ]
-              }
-            },
-            {
-              "id": "e8d96608-7a37-3ccd-880a-174767a8780c",
-              "name": "Detected Prohibited C Function",
-              "helpUri": "https://www.glog.ai/",
-              "help": {
-                "text": "",
-                "markdown": "## Description\n\n\"Detected Prohibited C Function\" vulnerability in C++ programming language refers to the use of insecure C library functions that can lead to various security issues such as buffer overflow, format string vulnerabilities, etc. In this case, the `printf(buffer)` function is used, which can lead to format string vulnerabilities if the buffer contains format specifiers like `%s`, `%n`, etc. \n\n## Mitigation Advice\n\nAvoid using insecure C library functions like `printf()`, `strcpy()`, `gets()`, etc. Instead, use safer alternatives that perform bounds checking or do not interpret format strings. \n\n## Source Code Fix Recommendation\n\nReplace `printf(buffer)` with `puts(buffer)` or `printf(\"%s\", buffer)`. \n\nHere is the fixed code:\n\n```cpp\n#include <cstdio>\n\nint main() {\n    char buffer[256];\n    // ... fill the buffer with data ...\n    // printf(buffer); // insecure\n    puts(buffer); // secure\n    // or\n    printf(\"%s\", buffer); // also secure\n    return 0;\n}\n```\n\n## Library Dependencies\n\nThe code example requires the C Standard General Utilities Library. In the code, it is included as `<cstdio>`.\n\n## References\n\n- [OWASP C++ Secure Coding Practices](https://cheatsheetseries.owasp.org/cheatsheets/C-Based_Toolchain_Hardening_Cheat_Sheet.html)\n- [CWE-134: Use of Externally-Controlled Format String](https://cwe.mitre.org/data/definitions/134.html)"
-              },
-              "properties": {
-                "cwe": [
-                  {
-                    "id": "CWE-134",
-                    "url": "https://cwe.mitre.org/data/definitions/134.html"
-                  }
-                ],
-                "severity": "MEDIUM",
-                "kind": "FAIL",
-                "tags": [
-                  "CWE-134"
+                  "CWE-338"
                 ]
               }
             },
@@ -144,24 +122,46 @@
               }
             },
             {
-              "id": "ec471128-c1cb-300c-b212-3f4bb4fbec26",
-              "name": "\"Prohibited C Function (gets) Vulnerability Detected\"",
+              "id": "27fbf7d2-3772-311f-ae81-7273100fcee9",
+              "name": "\"Detected Use of Prohibited C Function (gets)\"",
               "helpUri": "https://www.glog.ai/",
               "help": {
                 "text": "",
-                "markdown": "## Description\n\nThe `gets()` function in C++ is a standard library function that reads a line from stdin into the buffer pointed to by `str`. It stops when either the newline character is read or when the end-of-file is reached, whichever comes first. The newline character is discarded and replaced by a null-character.\n\nThe `gets()` function is dangerous because it does not check the array bounds, which can lead to buffer overflow. This can cause a program to crash or to execute arbitrary code. This is why the use of `gets()` is prohibited in C++.\n\n## Mitigation Advice\n\nAvoid using `gets()` function. Instead, use safer alternatives like `fgets()`, `gets_s()`, or `cin.getline()` in C++. These functions allow you to specify the maximum number of characters to be read, including the null character, which prevents buffer overflow.\n\n## Source Code Fix Recommendation\n\nReplace `gets(note)` with `fgets(note, sizeof(note), stdin)` or `cin.getline(note, sizeof(note))`.\n\n## Library Dependencies\n\nThe `gets()` function is part of the C Standard Library, so you need to include the `stdio.h` header file. If you use `cin.getline()`, you need to include the `iostream` header file.\n\n## References\n\n- [OWASP Buffer Overflow](https://owasp.org/www-community/vulnerabilities/Buffer_Overflow)\n- [CWE-120: Buffer Copy without Checking Size of Input ('Classic Buffer Overflow')](https://cwe.mitre.org/data/definitions/120.html)"
+                "markdown": "## Description\n\nThe `gets()` function in C++ is a standard library function that reads a line from `stdin` into the buffer pointed to by `s` until either a terminating newline or EOF (End of File). The vulnerability arises because `gets()` does not check for array bounds, which can lead to buffer overflow if the input has more characters than the buffer can hold. This can lead to arbitrary code execution or denial of service.\n\n## Mitigation Advice\n\nAvoid using `gets()` function. Instead, use safer alternatives like `fgets()`, `gets_s()`, or `cin.getline()` which take the size of the buffer as an argument and thus prevent buffer overflow.\n\n## Source Code Fix Recommendation\n\nReplace `gets(buffer)` with `fgets(buffer, sizeof(buffer), stdin)`. Here is the corrected code:\n\n```cpp\nchar buffer[256];\nfgets(buffer, sizeof(buffer), stdin);\n```\n\n## Library Dependencies\n\nThe code example requires the standard C++ library `<stdio.h>` or `<cstdio>` for `fgets()` function.\n\n## References\n\n- [OWASP Buffer Overflow](https://owasp.org/www-community/vulnerabilities/Buffer_Overflow)\n- [CWE-242: Use of Inherently Dangerous Function](https://cwe.mitre.org/data/definitions/242.html)"
               },
               "properties": {
                 "cwe": [
                   {
-                    "id": "CWE-120",
-                    "url": "https://cwe.mitre.org/data/definitions/120.html"
+                    "id": "CWE-242",
+                    "url": "https://cwe.mitre.org/data/definitions/242.html"
                   }
                 ],
                 "severity": "HIGH",
                 "kind": "FAIL",
                 "tags": [
-                  "CWE-120"
+                  "CWE-242"
+                ]
+              }
+            },
+            {
+              "id": "e8d96608-7a37-3ccd-880a-174767a8780c",
+              "name": "Detected Prohibited C Function",
+              "helpUri": "https://www.glog.ai/",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\n\"Detected Prohibited C Function\" vulnerability in C++ programming language refers to the use of insecure C library functions that can lead to various security issues such as buffer overflow, format string vulnerabilities, etc. In this case, the `printf(buffer)` function is used, which can lead to format string vulnerabilities if the buffer contains format specifiers like `%s`, `%n`, etc. \n\n## Mitigation Advice\n\nAvoid using insecure C library functions like `printf()`, `strcpy()`, `gets()`, etc. Instead, use safer alternatives that perform bounds checking or do not interpret format strings. \n\n## Source Code Fix Recommendation\n\nReplace `printf(buffer)` with `puts(buffer)` or `printf(\"%s\", buffer)`. \n\nHere is the fixed code:\n\n```cpp\n#include <cstdio>\n\nint main() {\n    char buffer[256];\n    // ... fill the buffer with data ...\n    // printf(buffer); // insecure\n    puts(buffer); // secure\n    // or\n    printf(\"%s\", buffer); // also secure\n    return 0;\n}\n```\n\n## Library Dependencies\n\nThe code example requires the C Standard General Utilities Library. In the code, it is included as `<cstdio>`.\n\n## References\n\n- [OWASP C++ Secure Coding Practices](https://cheatsheetseries.owasp.org/cheatsheets/C-Based_Toolchain_Hardening_Cheat_Sheet.html)\n- [CWE-134: Use of Externally-Controlled Format String](https://cwe.mitre.org/data/definitions/134.html)"
+              },
+              "properties": {
+                "cwe": [
+                  {
+                    "id": "CWE-134",
+                    "url": "https://cwe.mitre.org/data/definitions/134.html"
+                  }
+                ],
+                "severity": "MEDIUM",
+                "kind": "FAIL",
+                "tags": [
+                  "CWE-134"
                 ]
               }
             }
@@ -177,11 +177,11 @@
       "language": "en-US",
       "results": [
         {
-          "ruleId": "c6a40b22-1bb0-30da-a328-5990104e9e44",
+          "ruleId": "1dd596fd-f236-3581-ba3b-9c0106c06afb",
           "kind": "fail",
           "level": "error",
           "message": {
-            "text": "Avoid Using Non-Cryptographic or Weak Random Number Generators"
+            "text": "\"Detected Use of Prohibited C Function (strcpy)\""
           },
           "locations": [
             {
@@ -190,17 +190,17 @@
                   "uri": "DVCA-LVL-0.c"
                 },
                 "region": {
-                  "startLine": 119,
-                  "startColumn": 8,
-                  "endLine": 119,
-                  "endColumn": 13,
-                  "charOffset": 2684,
-                  "charLength": 5,
+                  "startLine": 116,
+                  "startColumn": 4,
+                  "endLine": 116,
+                  "endColumn": 56,
+                  "charOffset": 2572,
+                  "charLength": 52,
                   "snippet": {
-                    "text": "rand(",
+                    "text": "strcpy(portfolio_data, \"Historical portfolio data.\")",
                     "rendered": {
-                      "text": "rand(",
-                      "markdown": "`rand(`"
+                      "text": "strcpy(portfolio_data, \"Historical portfolio data.\")",
+                      "markdown": "`strcpy(portfolio_data, \"Historical portfolio data.\")`"
                     }
                   },
                   "sourceLanguage": "c"
@@ -209,17 +209,65 @@
             }
           ],
           "partialFingerprints": {
-            "glog-pfp-ruleFileLineCode/v1": "868e0ff22d470da148b54c470c3be23388799655b4489854e56bc78d58ba7ef9",
-            "glog-pfp-ruleFileCode/v1": "7d43ffc4d28085888e5b28bf79d823ab2704b1658c0524d3c641f79ea23b2389"
+            "glog-pfp-ruleFileLineCode/v1": "8362e203a2674e6e1a6f18df53a2c187494109f465f31eb6371d484424d6cc0c",
+            "glog-pfp-ruleFileCode/v1": "c455e20776dce82acecfcd337b627029771fd32356e05c61acb6ef7ec46a5792"
           },
           "fingerprints": {
-            "glog-fp-ruleFileCode/v1": "7d43ffc4d28085888e5b28bf79d823ab2704b1658c0524d3c641f79ea23b2389"
+            "glog-fp-ruleFileCode/v1": "c455e20776dce82acecfcd337b627029771fd32356e05c61acb6ef7ec46a5792"
           },
+          "fixes": [
+            {
+              "description": {
+                "text": "strcpy is frequently dangerous, as it will cause a buffer overflow if the source is larger than the destination."
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "DVCA-LVL-0.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 2572,
+                        "charLength": 52
+                      },
+                      "insertedContent": {
+                        "text": "strcpy_s(portfolio_data, <size of portfolio_data>,  \"Historical portfolio data.\")"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "description": {
+                "text": "strcpy is frequently dangerous, as it will cause a buffer overflow if the source is larger than the destination."
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "DVCA-LVL-0.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 2572,
+                        "charLength": 52
+                      },
+                      "insertedContent": {
+                        "text": "strlcpy(portfolio_data,  \"Historical portfolio data.\", <size of portfolio_data>)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
           "properties": {
             "DevSkimSeverity": "Important",
             "DevSkimConfidence": "High",
             "tags": [
-              "Cryptography.PRNG.Weak"
+              "API.DangerousAPI.BannedFunction"
             ]
           }
         },
@@ -312,6 +360,195 @@
           ],
           "properties": {
             "DevSkimSeverity": "Important",
+            "DevSkimConfidence": "High",
+            "tags": [
+              "API.DangerousAPI.BannedFunction"
+            ]
+          }
+        },
+        {
+          "ruleId": "ec471128-c1cb-300c-b212-3f4bb4fbec26",
+          "kind": "fail",
+          "level": "error",
+          "message": {
+            "text": "\"Prohibited C Function (gets) Vulnerability Detected\""
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "DVCA-LVL-0.c"
+                },
+                "region": {
+                  "startLine": 83,
+                  "startColumn": 4,
+                  "endLine": 83,
+                  "endColumn": 14,
+                  "charOffset": 1907,
+                  "charLength": 10,
+                  "snippet": {
+                    "text": "gets(note)",
+                    "rendered": {
+                      "text": "gets(note)",
+                      "markdown": "`gets(note)`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "glog-pfp-ruleFileLineCode/v1": "da12016f7979870f2cf978d77294e49c9a119706f8c559ee64eb1309e687da88",
+            "glog-pfp-ruleFileCode/v1": "5b7037f4a54aecbe366273303dc264bcba8dbb4f8d596b279e942c0095a671a3"
+          },
+          "fingerprints": {
+            "glog-fp-ruleFileCode/v1": "5b7037f4a54aecbe366273303dc264bcba8dbb4f8d596b279e942c0095a671a3"
+          },
+          "fixes": [
+            {
+              "description": {
+                "text": "gets will read in as many bytes as are provided, regardless of the size of buffer recieving the bytes.  This allows for conditions that cause a buffer overlow in the destination buffer."
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "DVCA-LVL-0.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 1907,
+                        "charLength": 10
+                      },
+                      "insertedContent": {
+                        "text": "gets_s(note, <size of note>)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "description": {
+                "text": "gets will read in as many bytes as are provided, regardless of the size of buffer recieving the bytes.  This allows for conditions that cause a buffer overlow in the destination buffer."
+              },
+              "artifactChanges": [
+                {
+                  "artifactLocation": {
+                    "uri": "DVCA-LVL-0.c"
+                  },
+                  "replacements": [
+                    {
+                      "deletedRegion": {
+                        "charOffset": 1907,
+                        "charLength": 10
+                      },
+                      "insertedContent": {
+                        "text": "fgets(note, <size of note>, stdin)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "properties": {
+            "DevSkimSeverity": "Important",
+            "DevSkimConfidence": "High",
+            "tags": [
+              "API.DangerousAPI.BannedFunction"
+            ]
+          }
+        },
+        {
+          "ruleId": "c6a40b22-1bb0-30da-a328-5990104e9e44",
+          "kind": "fail",
+          "level": "error",
+          "message": {
+            "text": "Avoid Using Non-Cryptographic or Weak Random Number Generators"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "DVCA-LVL-0.c"
+                },
+                "region": {
+                  "startLine": 119,
+                  "startColumn": 8,
+                  "endLine": 119,
+                  "endColumn": 13,
+                  "charOffset": 2684,
+                  "charLength": 5,
+                  "snippet": {
+                    "text": "rand(",
+                    "rendered": {
+                      "text": "rand(",
+                      "markdown": "`rand(`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "glog-pfp-ruleFileLineCode/v1": "868e0ff22d470da148b54c470c3be23388799655b4489854e56bc78d58ba7ef9",
+            "glog-pfp-ruleFileCode/v1": "7d43ffc4d28085888e5b28bf79d823ab2704b1658c0524d3c641f79ea23b2389"
+          },
+          "fingerprints": {
+            "glog-fp-ruleFileCode/v1": "7d43ffc4d28085888e5b28bf79d823ab2704b1658c0524d3c641f79ea23b2389"
+          },
+          "properties": {
+            "DevSkimSeverity": "Important",
+            "DevSkimConfidence": "High",
+            "tags": [
+              "Cryptography.PRNG.Weak"
+            ]
+          }
+        },
+        {
+          "ruleId": "6b037aac-92e3-3557-a304-750f5c04dab4",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Detected Prohibited C Function"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "DVCA-LVL-0.c"
+                },
+                "region": {
+                  "startLine": 32,
+                  "startColumn": 17,
+                  "endLine": 32,
+                  "endColumn": 22,
+                  "charOffset": 631,
+                  "charLength": 5,
+                  "snippet": {
+                    "text": "fopen",
+                    "rendered": {
+                      "text": "fopen",
+                      "markdown": "`fopen`"
+                    }
+                  },
+                  "sourceLanguage": "c"
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "glog-pfp-ruleFileLineCode/v1": "db526fa5689c59451948d06dc8778b25aab515e6d3ff2b67c6ab8f06d2a4073b",
+            "glog-pfp-ruleFileCode/v1": "761dc5fb55de92df0febe248578e0b8fee5f09bce939481a8de4bdb2c5bce841"
+          },
+          "fingerprints": {
+            "glog-fp-ruleFileCode/v1": "761dc5fb55de92df0febe248578e0b8fee5f09bce939481a8de4bdb2c5bce841"
+          },
+          "properties": {
+            "DevSkimSeverity": "Moderate",
             "DevSkimConfidence": "High",
             "tags": [
               "API.DangerousAPI.BannedFunction"
@@ -414,101 +651,6 @@
           }
         },
         {
-          "ruleId": "1dd596fd-f236-3581-ba3b-9c0106c06afb",
-          "kind": "fail",
-          "level": "error",
-          "message": {
-            "text": "\"Detected Use of Prohibited C Function (strcpy)\""
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "DVCA-LVL-0.c"
-                },
-                "region": {
-                  "startLine": 116,
-                  "startColumn": 4,
-                  "endLine": 116,
-                  "endColumn": 56,
-                  "charOffset": 2572,
-                  "charLength": 52,
-                  "snippet": {
-                    "text": "strcpy(portfolio_data, \"Historical portfolio data.\")",
-                    "rendered": {
-                      "text": "strcpy(portfolio_data, \"Historical portfolio data.\")",
-                      "markdown": "`strcpy(portfolio_data, \"Historical portfolio data.\")`"
-                    }
-                  },
-                  "sourceLanguage": "c"
-                }
-              }
-            }
-          ],
-          "partialFingerprints": {
-            "glog-pfp-ruleFileLineCode/v1": "8362e203a2674e6e1a6f18df53a2c187494109f465f31eb6371d484424d6cc0c",
-            "glog-pfp-ruleFileCode/v1": "c455e20776dce82acecfcd337b627029771fd32356e05c61acb6ef7ec46a5792"
-          },
-          "fingerprints": {
-            "glog-fp-ruleFileCode/v1": "c455e20776dce82acecfcd337b627029771fd32356e05c61acb6ef7ec46a5792"
-          },
-          "fixes": [
-            {
-              "description": {
-                "text": "strcpy is frequently dangerous, as it will cause a buffer overflow if the source is larger than the destination."
-              },
-              "artifactChanges": [
-                {
-                  "artifactLocation": {
-                    "uri": "DVCA-LVL-0.c"
-                  },
-                  "replacements": [
-                    {
-                      "deletedRegion": {
-                        "charOffset": 2572,
-                        "charLength": 52
-                      },
-                      "insertedContent": {
-                        "text": "strcpy_s(portfolio_data, <size of portfolio_data>,  \"Historical portfolio data.\")"
-                      }
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "description": {
-                "text": "strcpy is frequently dangerous, as it will cause a buffer overflow if the source is larger than the destination."
-              },
-              "artifactChanges": [
-                {
-                  "artifactLocation": {
-                    "uri": "DVCA-LVL-0.c"
-                  },
-                  "replacements": [
-                    {
-                      "deletedRegion": {
-                        "charOffset": 2572,
-                        "charLength": 52
-                      },
-                      "insertedContent": {
-                        "text": "strlcpy(portfolio_data,  \"Historical portfolio data.\", <size of portfolio_data>)"
-                      }
-                    }
-                  ]
-                }
-              ]
-            }
-          ],
-          "properties": {
-            "DevSkimSeverity": "Important",
-            "DevSkimConfidence": "High",
-            "tags": [
-              "API.DangerousAPI.BannedFunction"
-            ]
-          }
-        },
-        {
           "ruleId": "e8d96608-7a37-3ccd-880a-174767a8780c",
           "kind": "fail",
           "level": "warning",
@@ -549,148 +691,6 @@
           },
           "properties": {
             "DevSkimSeverity": "Moderate",
-            "DevSkimConfidence": "High",
-            "tags": [
-              "API.DangerousAPI.BannedFunction"
-            ]
-          }
-        },
-        {
-          "ruleId": "6b037aac-92e3-3557-a304-750f5c04dab4",
-          "kind": "fail",
-          "level": "warning",
-          "message": {
-            "text": "Detected Prohibited C Function"
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "DVCA-LVL-0.c"
-                },
-                "region": {
-                  "startLine": 32,
-                  "startColumn": 17,
-                  "endLine": 32,
-                  "endColumn": 22,
-                  "charOffset": 631,
-                  "charLength": 5,
-                  "snippet": {
-                    "text": "fopen",
-                    "rendered": {
-                      "text": "fopen",
-                      "markdown": "`fopen`"
-                    }
-                  },
-                  "sourceLanguage": "c"
-                }
-              }
-            }
-          ],
-          "partialFingerprints": {
-            "glog-pfp-ruleFileLineCode/v1": "db526fa5689c59451948d06dc8778b25aab515e6d3ff2b67c6ab8f06d2a4073b",
-            "glog-pfp-ruleFileCode/v1": "761dc5fb55de92df0febe248578e0b8fee5f09bce939481a8de4bdb2c5bce841"
-          },
-          "fingerprints": {
-            "glog-fp-ruleFileCode/v1": "761dc5fb55de92df0febe248578e0b8fee5f09bce939481a8de4bdb2c5bce841"
-          },
-          "properties": {
-            "DevSkimSeverity": "Moderate",
-            "DevSkimConfidence": "High",
-            "tags": [
-              "API.DangerousAPI.BannedFunction"
-            ]
-          }
-        },
-        {
-          "ruleId": "ec471128-c1cb-300c-b212-3f4bb4fbec26",
-          "kind": "fail",
-          "level": "error",
-          "message": {
-            "text": "\"Prohibited C Function (gets) Vulnerability Detected\""
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "DVCA-LVL-0.c"
-                },
-                "region": {
-                  "startLine": 83,
-                  "startColumn": 4,
-                  "endLine": 83,
-                  "endColumn": 14,
-                  "charOffset": 1907,
-                  "charLength": 10,
-                  "snippet": {
-                    "text": "gets(note)",
-                    "rendered": {
-                      "text": "gets(note)",
-                      "markdown": "`gets(note)`"
-                    }
-                  },
-                  "sourceLanguage": "c"
-                }
-              }
-            }
-          ],
-          "partialFingerprints": {
-            "glog-pfp-ruleFileLineCode/v1": "da12016f7979870f2cf978d77294e49c9a119706f8c559ee64eb1309e687da88",
-            "glog-pfp-ruleFileCode/v1": "5b7037f4a54aecbe366273303dc264bcba8dbb4f8d596b279e942c0095a671a3"
-          },
-          "fingerprints": {
-            "glog-fp-ruleFileCode/v1": "5b7037f4a54aecbe366273303dc264bcba8dbb4f8d596b279e942c0095a671a3"
-          },
-          "fixes": [
-            {
-              "description": {
-                "text": "gets will read in as many bytes as are provided, regardless of the size of buffer recieving the bytes.  This allows for conditions that cause a buffer overlow in the destination buffer."
-              },
-              "artifactChanges": [
-                {
-                  "artifactLocation": {
-                    "uri": "DVCA-LVL-0.c"
-                  },
-                  "replacements": [
-                    {
-                      "deletedRegion": {
-                        "charOffset": 1907,
-                        "charLength": 10
-                      },
-                      "insertedContent": {
-                        "text": "gets_s(note, <size of note>)"
-                      }
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "description": {
-                "text": "gets will read in as many bytes as are provided, regardless of the size of buffer recieving the bytes.  This allows for conditions that cause a buffer overlow in the destination buffer."
-              },
-              "artifactChanges": [
-                {
-                  "artifactLocation": {
-                    "uri": "DVCA-LVL-0.c"
-                  },
-                  "replacements": [
-                    {
-                      "deletedRegion": {
-                        "charOffset": 1907,
-                        "charLength": 10
-                      },
-                      "insertedContent": {
-                        "text": "fgets(note, <size of note>, stdin)"
-                      }
-                    }
-                  ]
-                }
-              ]
-            }
-          ],
-          "properties": {
-            "DevSkimSeverity": "Important",
             "DevSkimConfidence": "High",
             "tags": [
               "API.DangerousAPI.BannedFunction"
